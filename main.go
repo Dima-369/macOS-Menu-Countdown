@@ -13,6 +13,14 @@ import (
 	"github.com/ncruces/zenity"
 )
 
+// timerFinishedAudioFile specifies the relative path to the audio file
+// which is played once the timer is finished.
+//
+// This specified path is appended to os.Getwd() + "/".
+//
+// The file is played by invoking 'ffplay'.
+const timerFinishedAudioFile = "you-can-heal.mp3"
+
 const (
 	secondsInMinute = 60
 	secondsInHour   = 60 * 60
@@ -141,8 +149,12 @@ func countDown(startTime time.Time, totalCount, caffeinatePID int) {
 //
 // Ocenaudio was used to cut out the second from the mp3.
 func playFinishedSound() {
-	err := exec.Command("ffplay", "-nodisp", "-autoexit",
-		"/Users/Gira/Documents/go/src/mine/bash/countdown/over.mp3").Run()
+	wd, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+
+	err = exec.Command("ffplay", "-nodisp", "-autoexit", wd+"/"+timerFinishedAudioFile).Run()
 	if err != nil {
 		panic(err)
 	}
