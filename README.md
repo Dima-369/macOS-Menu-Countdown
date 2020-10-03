@@ -3,7 +3,7 @@ A Go application launched from shell to display a menu timer for macOS.
 It uses [zenith](https://github.com/ncruces/zenity) to display the 'Timer is finished' dialog and
 notification plus [menuet](https://github.com/caseymrm/menuet) to display the menu timer.
 
-*Features*
+**Features**
 
 * Multiple timers are supported (just launch a new tab in iTerm because this is blocking)
 * Menu timer keeps counting once it reaches 00:00:00 (useful when the initial countdown was missed)
@@ -55,8 +55,8 @@ This is especially problematic because clicking the 'Quit' menu item correctly q
 but still leaves the `caffeinate -i` process (started in a Goroutine) running.
 `caffeinate -i` prevents system sleep and it is not good to keep it running without any reason.
 
-Registering a signal to still catch the 'Quit' click apparently causes an internal panic with 
-[menuet](https://github.com/caseymrm/menuet) (maybe because it is used there internally as well?),
-so there is really no way to correctly handle the 'Quit' menu item, so better not click it!
+Apparently, registering a signal to catch the 'Quit' click causes an internal panic with 
+[menuet](https://github.com/caseymrm/menuet) (maybe because it is used there as well?),
+so there is really no way to correctly handle the 'Quit' menu item, **so better not click it!**
 
 ![Problematic Quti Menu Item](https://raw.githubusercontent.com/Gira-X/macos-menu-countdown/master/readme-images/menu.png)
