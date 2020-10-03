@@ -11,7 +11,7 @@ notification plus [menuet](https://github.com/caseymrm/menuet) to display the me
 * When quit by Enter from the shell it displays the remaining time (don't use Ctrl+C)
   * Registering any signals does not work with [menuet](https://github.com/caseymrm/menuet) apparently
 
-![]()
+![Multiple timers](https://raw.githubusercontent.com/Gira-X/macos-menu-countdown/master/readme-images/multiple-timers.png)
 
 ---
 
@@ -60,4 +60,4 @@ Apparently, registering a signal to catch the 'Quit' click causes an internal pa
 [menuet](https://github.com/caseymrm/menuet) (maybe because it is used there as well?),
 so there is really no way to correctly handle the 'Quit' menu item, **so better not click it!**
 
-![Problematic Quti Menu Item](https://raw.githubusercontent.com/Gira-X/macos-menu-countdown/master/readme-images/menu.png)
+![Problematic Quit Menu Item](https://raw.githubusercontent.com/Gira-X/macos-menu-countdown/master/readme-images/menu.png)
