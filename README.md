@@ -1,16 +1,23 @@
-A Go application launched from a shell to display a menu timer for macOS.
+A Go application launched from shell to display a menu timer for macOS.
 
 It uses [zenith](https://github.com/ncruces/zenity) to display the 'Timer is finished' dialog and
-a notification and [menuet](https://github.com/caseymrm/menuet) to display the menu timer.
+notification plus [menuet](https://github.com/caseymrm/menuet) to display the menu timer.
+
+*Features*
+
+* Multiple timers are supported (just launch a new tab in iTerm because this is blocking)
+* Menu timer keeps counting once it reaches 00:00:00 (useful when the initial countdown was missed)
+* When quit by Enter from the shell it displays the remaining time
+  * Registering any signals does not work with [menuet](https://github.com/caseymrm/menuet) apparently
+
+![]()
 
 ---
 
 Inspired by https://github.com/kristopherjohnson/MenubarCountdown which I previously used and liked,
-but I wanted to invoke the countdown from a shell and customize it more.
+but I wanted to invoke the countdown from shell and customize it more.
 
-Multiple timers are supported (I just launch a new tab in iTerm) and the timer keeps 
-counting once it reaches 00:00:00 which is useful when one misses a countdown and wants
-to see how much time passed.
+Digging into the 
 
 
 ## Installation
@@ -27,11 +34,16 @@ to see how much time passed.
   25,      (25 minutes)
   25,20    (25 minutes and 20 seconds)
   1,25,120 (1 hour, 25 minutes and 120 seconds)
+
+> countdown 15
+Hit Enter to cancel >
+
+00:14:59 left...
 ```
 
 I rarely use the options to set seconds or hours, so I just run it like `countdown 15` to set a timer for 15 minutes.
 
-I also have the application renamed to `tim` because it is a lot shorter and invoke it like `tim 15`.
+I also have the application renamed to `tim` because it is nicer to invoke it like `tim 15`.
 
 
 ## Caveats
@@ -47,4 +59,4 @@ Registering a signal to still catch the 'Quit' click apparently causes an intern
 [menuet](https://github.com/caseymrm/menuet) (maybe because it is used there internally as well?),
 so there is really no way to correctly handle the 'Quit' menu item, so better not click it!
 
-![]()
+![Problematic Quti Menu Item](https://raw.githubusercontent.com/Gira-X/macos-menu-countdown/master/readme-images/menu.png)
