@@ -154,6 +154,7 @@ func playFinishedSound() {
 		panic(err)
 	}
 
+	// #nosec
 	err = exec.Command("ffplay", "-nodisp", "-autoexit", wd+"/"+timerFinishedAudioFile).Run()
 	if err != nil {
 		panic(err)
