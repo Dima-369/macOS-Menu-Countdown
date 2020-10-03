@@ -1,4 +1,4 @@
-module main
+module countdown
 
 go 1.15
 
