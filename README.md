@@ -5,9 +5,10 @@ notification plus [menuet](https://github.com/caseymrm/menuet) to display the me
 
 **Features**
 
-* Multiple timers are supported (just launch a new tab in iTerm because this is blocking)
+* Multiple timers are supported (just launch a new tab in iTerm because launching this from shell is blocking)
 * Menu timer keeps counting once it reaches 00:00:00 (useful when the initial countdown was missed)
-* When quit by Enter from the shell it displays the remaining time
+  * This is displayed as -00:02:00 in the menu
+* When quit by Enter from the shell it displays the remaining time (don't use Ctrl+C)
   * Registering any signals does not work with [menuet](https://github.com/caseymrm/menuet) apparently
 
 ![]()
