@@ -23,12 +23,14 @@ Digging into the Objective C was not worth the effort for me, so I just redid th
 
 ## Installation
 
-`go get github.com/Gira-X/macos-menu-countdown`
-
-I have the application renamed to `tim` because it looks nicer :)
-
 The application requires `ffplay` to be installed.
 Once the timer is finished, an audo file named `you-can-heal.mp3` in the same directory as the application is played.
+
+`go get github.com/Gira-X/macos-menu-countdown`
+
+This builds the application in `GOBIN` named `macos-menu-countdown` which is really not a nice name,
+so feel free to rename it to `countdown` or something like `tim` (I personally use this short version).
+
 
 
 ## Usage
