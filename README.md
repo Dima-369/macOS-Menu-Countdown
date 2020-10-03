@@ -18,7 +18,7 @@ notification plus [menuet](https://github.com/caseymrm/menuet) to display the me
 Inspired by https://github.com/kristopherjohnson/MenubarCountdown which I previously used and liked,
 but I wanted to invoke the countdown from shell and customize it more.
 
-Digging into the 
+Digging into the Objective C was not worth the effort for me, so I just redid this in Go.
 
 
 ## Installation
@@ -58,6 +58,6 @@ but still leaves the `caffeinate -i` process (started in a Goroutine) running.
 
 Apparently, registering a signal to catch the 'Quit' click causes an internal panic with 
 [menuet](https://github.com/caseymrm/menuet) (maybe because it is used there as well?),
-so there is really no way to correctly handle the 'Quit' menu item, **so better not click it!**
+so **there is no way to correctly handle the 'Quit' menu item, so do not click it!**
 
 ![Problematic Quit Menu Item](https://raw.githubusercontent.com/Gira-X/macos-menu-countdown/master/readme-images/menu.png)
