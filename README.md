@@ -25,6 +25,8 @@ Digging into the Objective C was not worth the effort for me, so I just redid th
 
 `go get github.com/Gira-X/macos-menu-countdown`
 
+I also have the application renamed to `tim` because it is nicer to invoke it like `tim 15`.
+
 
 ## Usage
 
@@ -44,9 +46,6 @@ Hit Enter to cancel >
 
 I rarely use the options to set seconds or hours, so I just run it like `countdown 15` to set a timer for 15 minutes.
 
-I also have the application renamed to `tim` because it is nicer to invoke it like `tim 15`.
-
-
 ## Caveats
 
 There is the issue with the [menuet](https://github.com/caseymrm/menuet) library that it does not have any 
@@ -58,6 +57,9 @@ but still leaves the `caffeinate -i` process (started in a Goroutine) running.
 
 Registering a signal to catch the 'Quit' click causes an internal panic with 
 [menuet](https://github.com/caseymrm/menuet).
+
 **So do not click the 'Quit' menu item!**
+
+If you still did, call `pkill caffeinate` to kill the process correctly.
 
 ![Problematic Quit Menu Item](https://raw.githubusercontent.com/Gira-X/macos-menu-countdown/master/readme-images/menu.png)
