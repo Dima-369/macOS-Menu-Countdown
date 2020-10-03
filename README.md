@@ -56,8 +56,8 @@ This is especially problematic because clicking the 'Quit' menu item correctly q
 but still leaves the `caffeinate -i` process (started in a Goroutine) running.
 `caffeinate -i` prevents system sleep and it is not good to keep it running without any reason.
 
-Apparently, registering a signal to catch the 'Quit' click causes an internal panic with 
-[menuet](https://github.com/caseymrm/menuet) (maybe because it is used there as well?),
-so **there is no way to correctly handle the 'Quit' menu item, so do not click it!**
+Registering a signal to catch the 'Quit' click causes an internal panic with 
+[menuet](https://github.com/caseymrm/menuet).
+**So do not click the 'Quit' menu item!**
 
 ![Problematic Quit Menu Item](https://raw.githubusercontent.com/Gira-X/macos-menu-countdown/master/readme-images/menu.png)
