@@ -1,4 +1,4 @@
-module mine/bash/countdown
+module main
 
 go 1.15
 
