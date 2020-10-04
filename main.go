@@ -144,10 +144,6 @@ func countDown(startTime time.Time, totalCount, caffeinatePID int) {
 	}
 }
 
-// playFinishedSound plays the end (at 24 minutes) 'You can Heal' snippet from
-// Anthony William's brain meditation.
-//
-// Ocenaudio was used to cut out the second from the mp3.
 func playFinishedSound() {
 	wd, err := os.Getwd()
 	if err != nil {
