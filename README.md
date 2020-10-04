@@ -23,14 +23,13 @@ Digging into the Objective C was not worth the effort for me, so I just redid th
 
 ## Installation
 
-The application requires `ffplay` to be installed.
+The application requires `ffplay` to be installed which can be installed by `brew install ffmpeg`.
 Once the timer is finished, an audo file named `you-can-heal.mp3` in the same directory as the application is played.
 
 `go get github.com/Gira-X/macos-menu-countdown`
 
-This builds the application in `GOBIN` named `macos-menu-countdown` which is really not a nice name,
-so feel free to rename it to `countdown` or something like `tim` (I personally use this short version).
-
+This builds the application in `$GOBIN` named `macos-menu-countdown` which is really not a nice name,
+so feel free to rename it to `countdown` or `tim` (which I use personally).
 
 
 ## Usage
@@ -49,7 +48,7 @@ Hit Enter to cancel >
 00:14:59 left...
 ```
 
-I rarely use the options to set seconds or hours, so I just run it like `countdown 15` to set a timer for 15 minutes.
+I rarely use the options to set seconds or hours, so I usually run it like `countdown 15` to set a timer for 15 minutes.
 
 ## Caveats
 
