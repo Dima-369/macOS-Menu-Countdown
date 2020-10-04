@@ -26,7 +26,9 @@ Digging into the Objective C was not worth the effort for me, so I just redid th
 The application requires `ffplay` to be installed which can be installed by `brew install ffmpeg`.
 Once the timer is finished, an audo file named `you-can-heal.mp3` in the same directory as the application is played.
 
-`go get github.com/Gira-X/macos-menu-countdown`
+The `you-can-heal.mp3` audio is cut from the end of the [Medical Medium's Brain Meditation](https://podcasts.apple.com/us/podcast/003-brain-meditation-letting-go-of-fear/id1133835109?i=1000492358953).
+
+Install by `go get github.com/Gira-X/macos-menu-countdown`
 
 This builds the application in `$GOBIN` named `macos-menu-countdown` which is really not a nice name,
 so feel free to rename it to `countdown` or `tim` (which I use personally).
