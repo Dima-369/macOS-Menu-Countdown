@@ -62,7 +62,7 @@ func getRemainingTime(endTime time.Time) countdown {
 
 	total := int64(difference.Seconds())
 	hours := total / (secondsInHour) % hoursInDay
-	minutes := total / secondsInMinute
+	minutes := (total / secondsInMinute) % secondsInMinute
 	seconds := total % secondsInMinute
 
 	return countdown{
