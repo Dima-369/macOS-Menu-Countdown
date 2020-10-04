@@ -33,6 +33,8 @@ Install by `go get github.com/Gira-X/macos-menu-countdown`
 This builds the application in `$GOBIN` named `macos-menu-countdown` which is really not a nice name,
 so feel free to rename it to `countdown` or `tim` (which I use personally).
 
+Then move the `you-can-heal.mp3` audio file from this repository into `$GOBIN`.
+
 
 ## Usage
 
