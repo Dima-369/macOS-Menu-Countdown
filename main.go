@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -13,10 +14,9 @@ import (
 	"github.com/ncruces/zenity"
 )
 
-// timerFinishedAudioFile specifies the relative path to the audio file
-// which is played once the timer is finished.
+// timerFinishedAudioFile specifies the audio file which is played once the timer is finished.
 //
-// This specified path is appended to os.Getwd() + "/".
+// This file should be in the same directory as this executable.
 //
 // The file is played by invoking 'ffplay'.
 const timerFinishedAudioFile = "you-can-heal.mp3"
@@ -145,13 +145,15 @@ func countDown(startTime time.Time, totalCount, caffeinatePID int) {
 }
 
 func playFinishedSound() {
-	wd, err := os.Getwd()
+	exe, err := os.Executable()
 	if err != nil {
 		panic(err)
 	}
 
+	path := filepath.Dir(exe)
+
 	// #nosec
-	err = exec.Command("ffplay", "-nodisp", "-autoexit", wd+"/"+timerFinishedAudioFile).Run()
+	err = exec.Command("ffplay", "-nodisp", "-autoexit", path+"/"+timerFinishedAudioFile).Run()
 	if err != nil {
 		panic(err)
 	}
