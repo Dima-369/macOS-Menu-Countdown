@@ -242,11 +242,11 @@ func printUsage() {
 		"  1,25,120 (1 hour, 25 minutes and 120 seconds)")
 }
 
-// signalEnd queries stdin for an Enter to abort the program.
+// waitForStdinToQuit queries stdin for an Enter to abort the program.
 //
 // Using a signal notifier like: signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 // causes an internal crash with the menu bar C code it seems and is not fixable.
-func signalEnd(startTime time.Time, totalSeconds, caffeinatePID int) {
+func waitForStdinToQuit(startTime time.Time, totalSeconds, caffeinatePID int) {
 	reader := bufio.NewReader(os.Stdin)
 
 	fmt.Printf("Hit Enter to cancel > ")
@@ -328,7 +328,7 @@ func main() {
 	countInSeconds := parseStringCountToSeconds(count)
 	caffeinatePID := preventSystemSleep()
 
-	go signalEnd(startTime, countInSeconds, caffeinatePID)
+	go waitForStdinToQuit(startTime, countInSeconds, caffeinatePID)
 
 	go countDown(startTime, countInSeconds, caffeinatePID)
 
