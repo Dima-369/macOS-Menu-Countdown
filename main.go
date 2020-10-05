@@ -107,7 +107,7 @@ func getSecondCountAsHumanString(c int) string {
 	return out
 }
 
-func countDown(startTime time.Time, totalCount, caffeinatePID int) {
+func countDown(startTime time.Time, timerName string, totalCount, caffeinatePID int) {
 	countDown := time.Duration(totalCount) * time.Second
 	doneOn := startTime.Add(countDown)
 
@@ -130,8 +130,13 @@ func countDown(startTime time.Time, totalCount, caffeinatePID int) {
 			menuString = remaining.toString()
 		}
 
+		title := menuString
+		if timerName != "" {
+			title = timerName + " " + title
+		}
+
 		menuet.App().SetMenuState(&menuet.MenuState{
-			Title: menuString,
+			Title: title,
 		})
 
 		if remaining.isOverTime() && !isOverTime {
@@ -330,7 +335,14 @@ func main() {
 
 	go waitForStdinToQuit(startTime, countInSeconds, caffeinatePID)
 
-	go countDown(startTime, countInSeconds, caffeinatePID)
+	timerName := ""
+
+	const hasTimerName = 3
+	if len(os.Args) >= hasTimerName {
+		timerName = os.Args[2]
+	}
+
+	go countDown(startTime, timerName, countInSeconds, caffeinatePID)
 
 	menuet.App().RunApplication()
 }
