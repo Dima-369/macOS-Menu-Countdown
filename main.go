@@ -165,6 +165,8 @@ func playFinishedSound() {
 }
 
 func timerIsUp(caffeinatePID, totalCount int) {
+	killCaffeinate(caffeinatePID)
+
 	forHuman := getSecondCountAsHumanString(totalCount)
 
 	text := ""
@@ -190,7 +192,7 @@ func timerIsUp(caffeinatePID, totalCount int) {
 		panic(err)
 	}
 
-	exitAndKillCaffeinate(caffeinatePID, 0)
+	os.Exit(0)
 }
 
 func safeAtoi(s string) int {
@@ -276,20 +278,20 @@ func waitForStdinToQuit(startTime time.Time, totalSeconds, caffeinatePID int) {
 	exitAndKillCaffeinate(caffeinatePID, 0)
 }
 
-func exitAndKillCaffeinate(caffeinatePID, exitCode int) {
+func killCaffeinate(pid int) {
 	// #nosec
-	cmd := exec.Command("kill", strconv.Itoa(caffeinatePID))
+	cmd := exec.Command("kill", strconv.Itoa(pid))
 
-	err := cmd.Start()
-	if err != nil {
+	if err := cmd.Start(); err != nil {
 		panic(err)
 	}
 
-	err = cmd.Wait()
-	if err != nil {
-		panic(err)
-	}
+	// we do not check for errors here because the timer might have already been killed
+	_ = cmd.Wait()
+}
 
+func exitAndKillCaffeinate(caffeinatePID, exitCode int) {
+	killCaffeinate(caffeinatePID)
 	os.Exit(exitCode)
 }
 
@@ -309,17 +311,8 @@ func preventSystemSleep() int {
 	pid := cmd.Process.Pid
 
 	go func() {
-		err = cmd.Wait()
-		if err != nil {
-			panic(err)
-		}
-
-		_, err = zenity.Info("'caffeinate -i' was quit?\nThis should really not happen!",
-			zenity.Title("Timer is finished"),
-			zenity.Icon(zenity.InfoIcon))
-		if err != nil {
-			panic(err)
-		}
+		// when the timer is up, the caffeinate process is killed, so we do not check for errors here
+		_ = cmd.Wait()
 	}()
 
 	return pid
