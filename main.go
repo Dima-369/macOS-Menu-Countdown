@@ -239,7 +239,9 @@ func parseStringCountToSeconds(s string) int {
 }
 
 func printUsage() {
-	println("Valid time options are:\n" +
+	println("Usage:\n" +
+		"  countdown {time option} {optional timer name}\n\n" +
+		"Valid time options are:\n" +
 		" ,15       (15 seconds)\n" +
 		"  25       (25 minutes)\n" +
 		"  25,      (25 minutes)\n" +
@@ -264,7 +266,12 @@ func waitForStdinToQuit(startTime time.Time, totalSeconds, caffeinatePID int) {
 	doneOn := startTime.Add(time.Second * time.Duration(totalSeconds))
 	remaining := getRemainingTime(doneOn)
 
-	fmt.Printf("\n%s left...\n", remaining.toString())
+	if remaining.isOverTime() {
+		remaining.flipForOverTime()
+		fmt.Printf("\n%s over time...\n", remaining.toString())
+	} else {
+		fmt.Printf("\n%s left...\n", remaining.toString())
+	}
 
 	exitAndKillCaffeinate(caffeinatePID, 0)
 }
