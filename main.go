@@ -28,6 +28,9 @@ const (
 	timeStep        = time.Millisecond * 200
 )
 
+// this global variable is apparently required because one can't pass arguments to properQuitMenuItem().
+var caffeinatePID = 0
+
 type countdown struct {
 	hours   int
 	minutes int
@@ -107,7 +110,21 @@ func getSecondCountAsHumanString(c int) string {
 	return out
 }
 
-func countDown(startTime time.Time, timerName string, totalCount, caffeinatePID int) {
+func properQuitMenuItem() []menuet.MenuItem {
+	return []menuet.MenuItem{
+		{
+			Text: "Proper Quit",
+			Clicked: func() {
+				exitAndKillCaffeinate(0)
+			},
+		},
+	}
+}
+
+func countDown(startTime time.Time, timerName string, totalCount int) {
+	menuet.App().Label = fmt.Sprintf("%d", caffeinatePID)
+	menuet.App().Children = properQuitMenuItem
+
 	countDown := time.Duration(totalCount) * time.Second
 	doneOn := startTime.Add(countDown)
 
@@ -142,7 +159,7 @@ func countDown(startTime time.Time, timerName string, totalCount, caffeinatePID 
 		if remaining.isOverTime() && !isOverTime {
 			isOverTime = true
 
-			go timerIsUp(caffeinatePID, totalCount)
+			go timerIsUp(totalCount)
 		}
 
 		time.Sleep(timeStep)
@@ -164,8 +181,8 @@ func playFinishedSound() {
 	}
 }
 
-func timerIsUp(caffeinatePID, totalCount int) {
-	killCaffeinate(caffeinatePID)
+func timerIsUp(totalCount int) {
+	killCaffeinate()
 
 	forHuman := getSecondCountAsHumanString(totalCount)
 
@@ -255,7 +272,7 @@ func printUsage() {
 //
 // Using a signal notifier like: signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 // causes an internal crash with the menu bar C code it seems and is not fixable.
-func waitForStdinToQuit(startTime time.Time, totalSeconds, caffeinatePID int) {
+func waitForStdinToQuit(startTime time.Time, totalSeconds int) {
 	reader := bufio.NewReader(os.Stdin)
 
 	fmt.Printf("Hit Enter to cancel > ")
@@ -275,12 +292,12 @@ func waitForStdinToQuit(startTime time.Time, totalSeconds, caffeinatePID int) {
 		fmt.Printf("\n%s left...\n", remaining.toString())
 	}
 
-	exitAndKillCaffeinate(caffeinatePID, 0)
+	exitAndKillCaffeinate(0)
 }
 
-func killCaffeinate(pid int) {
+func killCaffeinate() {
 	// #nosec
-	cmd := exec.Command("kill", strconv.Itoa(pid))
+	cmd := exec.Command("kill", strconv.Itoa(caffeinatePID))
 
 	if err := cmd.Start(); err != nil {
 		panic(err)
@@ -290,17 +307,16 @@ func killCaffeinate(pid int) {
 	_ = cmd.Wait()
 }
 
-func exitAndKillCaffeinate(caffeinatePID, exitCode int) {
-	killCaffeinate(caffeinatePID)
+func exitAndKillCaffeinate(exitCode int) {
+	killCaffeinate()
 	os.Exit(exitCode)
 }
 
-// preventSystemSleep makes sure that the system does not idle sleep to keep the timer running correctly.
+// preventSystemSleepViaCaffeinate makes sure that the system does not
+// idle sleep to keep the timer running correctly.
 //
 // This still allows the display to turn off.
-//
-// The PID of the 'caffeinate -i' command is returned.
-func preventSystemSleep() int {
+func preventSystemSleepViaCaffeinate() {
 	cmd := exec.Command("caffeinate", "-i")
 
 	err := cmd.Start()
@@ -315,7 +331,7 @@ func preventSystemSleep() int {
 		_ = cmd.Wait()
 	}()
 
-	return pid
+	caffeinatePID = pid
 }
 
 func main() {
@@ -331,9 +347,10 @@ func main() {
 
 	startTime := time.Now()
 	countInSeconds := parseStringCountToSeconds(count)
-	caffeinatePID := preventSystemSleep()
 
-	go waitForStdinToQuit(startTime, countInSeconds, caffeinatePID)
+	preventSystemSleepViaCaffeinate()
+
+	go waitForStdinToQuit(startTime, countInSeconds)
 
 	timerName := ""
 
@@ -342,7 +359,7 @@ func main() {
 		timerName = os.Args[2]
 	}
 
-	go countDown(startTime, timerName, countInSeconds, caffeinatePID)
+	go countDown(startTime, timerName, countInSeconds)
 
 	menuet.App().RunApplication()
 }
