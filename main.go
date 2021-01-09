@@ -175,7 +175,7 @@ func playFinishedSound() {
 	path := filepath.Dir(exe)
 
 	// #nosec
-	err = exec.Command("ffplay", "-nodisp", "-autoexit", path+"/"+timerFinishedAudioFile).Run()
+	err = exec.Command("afplay", path+"/"+timerFinishedAudioFile).Run()
 	if err != nil {
 		panic(err)
 	}
