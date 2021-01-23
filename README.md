@@ -3,10 +3,12 @@ A Go application launched from shell to display a menu timer for macOS.
 It uses [zenith](https://github.com/ncruces/zenity) to display the 'Timer is finished' dialog and
 notification plus [menuet](https://github.com/caseymrm/menuet) to display the menu timer.
 
+---
+
 **It's probably better to implement this directly in Swift to hide the 'Start at Login' and 'Quit'
 menu items.**
 
-**Features**
+## Features
 
 * Multiple timers are supported (just launch a new tab in iTerm because launching this from shell is blocking)
 * Menu timer keeps counting once it reaches 00:00:00 (useful when the initial countdown was missed)
