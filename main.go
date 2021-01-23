@@ -25,7 +25,7 @@ const (
 	secondsInMinute = 60
 	secondsInHour   = 60 * 60
 	hoursInDay      = 24
-	timeStep        = time.Millisecond * 200
+	timeStep        = time.Millisecond * 666
 )
 
 // this global variable is apparently required because one can't pass arguments to properQuitMenuItem().
@@ -59,19 +59,18 @@ func (c *countdown) flipForOverTime() {
 	}
 }
 
-func getRemainingTime(endTime time.Time) countdown {
-	now := time.Now()
-	difference := endTime.Sub(now)
+func getRemainingTime(endTime int) countdown {
+	now := getUnixTimestamp()
+	difference := endTime - now
 
-	total := int64(difference.Seconds())
-	hours := total / (secondsInHour) % hoursInDay
-	minutes := (total / secondsInMinute) % secondsInMinute
-	seconds := total % secondsInMinute
+	hours := difference / (secondsInHour) % hoursInDay
+	minutes := (difference / secondsInMinute) % secondsInMinute
+	seconds := difference % secondsInMinute
 
 	return countdown{
-		hours:   int(hours),
-		minutes: int(minutes),
-		seconds: int(seconds),
+		hours:   hours,
+		minutes: minutes,
+		seconds: seconds,
 	}
 }
 
@@ -121,12 +120,11 @@ func properQuitMenuItem() []menuet.MenuItem {
 	}
 }
 
-func countDown(startTime time.Time, timerName string, totalCount int) {
+func countDown(startTime int, timerName string, totalCount int) {
 	menuet.App().Label = fmt.Sprintf("%d", caffeinatePID)
 	menuet.App().Children = properQuitMenuItem
 
-	countDown := time.Duration(totalCount) * time.Second
-	doneOn := startTime.Add(countDown)
+	doneOn := startTime + totalCount
 
 	isOverTime := false
 
@@ -166,18 +164,24 @@ func countDown(startTime time.Time, timerName string, totalCount int) {
 	}
 }
 
+// Note that there are problems when this application is run via 'go build' because the path returned
+// from os.Executable() will not be correct!
+//
+// So use something like: 'go build main.go && ./main ,2'.
 func playFinishedSound() {
 	exe, err := os.Executable()
 	if err != nil {
-		panic(err)
+		//panic(err)
 	}
 
 	path := filepath.Dir(exe)
+	print(path)
+time.Sleep(time.Second * 5)
 
 	// #nosec
 	err = exec.Command("afplay", path+"/"+timerFinishedAudioFile).Run()
 	if err != nil {
-		panic(err)
+		//panic(err)
 	}
 }
 
@@ -197,7 +201,7 @@ func timerIsUp(totalCount int) {
 		zenity.Title("Timer is finished"),
 		zenity.Icon(zenity.InfoIcon))
 	if err != nil {
-		panic(err)
+		//panic(err)
 	}
 
 	go playFinishedSound()
@@ -206,7 +210,7 @@ func timerIsUp(totalCount int) {
 		zenity.Title("Timer is finished"),
 		zenity.Icon(zenity.InfoIcon))
 	if err != nil {
-		panic(err)
+		//panic(err)
 	}
 
 	os.Exit(0)
@@ -272,17 +276,17 @@ func printUsage() {
 //
 // Using a signal notifier like: signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 // causes an internal crash with the menu bar C code it seems and is not fixable.
-func waitForStdinToQuit(startTime time.Time, totalSeconds int) {
+func waitForStdinToQuit(startTime int, totalSeconds int) {
 	reader := bufio.NewReader(os.Stdin)
 
 	fmt.Printf("Hit Enter to cancel > ")
 
 	_, err := reader.ReadString('\n')
 	if err != nil {
-		panic(err)
+		//panic(err)
 	}
 
-	doneOn := startTime.Add(time.Second * time.Duration(totalSeconds))
+	doneOn := startTime + totalSeconds
 	remaining := getRemainingTime(doneOn)
 
 	if remaining.isOverTime() {
@@ -300,7 +304,7 @@ func killCaffeinate() {
 	cmd := exec.Command("kill", strconv.Itoa(caffeinatePID))
 
 	if err := cmd.Start(); err != nil {
-		panic(err)
+		//panic(err)
 	}
 
 	// we do not check for errors here because the timer might have already been killed
@@ -321,7 +325,7 @@ func preventSystemSleepViaCaffeinate() {
 
 	err := cmd.Start()
 	if err != nil {
-		panic(err)
+		//panic(err)
 	}
 
 	pid := cmd.Process.Pid
@@ -332,6 +336,20 @@ func preventSystemSleepViaCaffeinate() {
 	}()
 
 	caffeinatePID = pid
+}
+
+// getUnixTimestamp returns the seconds since 1. January 1970 00:00 UTC.
+//
+// time.Now() has issues when the laptop goes to sleep mode because it does not
+// count the seconds correctly afterwards.
+func getUnixTimestamp() int {
+	cmd := exec.Command("date", "+%s")
+	out, err := cmd.Output()
+	if err != nil {
+		//panic(err)
+	}
+	asInt := safeAtoi(strings.TrimSpace(string(out)))
+	return asInt
 }
 
 func main() {
@@ -345,12 +363,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	startTime := time.Now()
+	startTime := getUnixTimestamp()
 	countInSeconds := parseStringCountToSeconds(count)
 
 	preventSystemSleepViaCaffeinate()
 
-	go waitForStdinToQuit(startTime, countInSeconds)
+	//go waitForStdinToQuit(startTime, countInSeconds)
 
 	timerName := ""
 
