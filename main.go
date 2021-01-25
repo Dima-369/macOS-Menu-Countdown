@@ -38,7 +38,15 @@ func totalSecondsToString(totalSeconds int) string {
 	in := nearestDisplayFine(totalSeconds)
 	m := in / secondsInMinute
 	s := in % secondsInMinute
-	return fmt.Sprintf("%d,%d", m, s)
+
+	out := fmt.Sprintf("%d%0.2d", m, s)
+	if m > 9 {
+		return fmt.Sprintf("%do", m)
+	}
+	if len(out) < 3 {
+		return "0" + out
+	}
+	return out
 }
 
 func toString(minutes, seconds int) string {
@@ -182,13 +190,7 @@ func timerIsUp(totalCount int) {
 	killCaffeinate()
 
 	forHuman := totalSecondsToString(totalCount)
-
-	text := ""
-	if strings.HasSuffix(forHuman, "s") {
-		text = fmt.Sprintf("%s have passed.", forHuman)
-	} else {
-		text = fmt.Sprintf("%s has passed.", forHuman)
-	}
+	text := fmt.Sprintf("%s passed.", forHuman)
 
 	err := zenity.Notify(text,
 		zenity.Title("Timer is finished"),
