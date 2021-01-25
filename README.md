@@ -11,7 +11,7 @@ menu items.**
 ## Features
 
 * Multiple timers are supported (just launch a new tab in iTerm because launching this from shell is blocking)
-* Menu timer keeps counting once it reaches 00:00:00 (useful when the initial countdown was missed)
+* Menu timer keeps counting once it reaches 0 (useful when the initial countdown was missed)
   * This is displayed with a minus like -3,33 in the menu
 * When quit by Enter from the shell, it displays the remaining time (don't use Ctrl+C)
   * Registering any signals does not work with [menuet](https://github.com/caseymrm/menuet) apparently
