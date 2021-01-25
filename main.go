@@ -41,7 +41,11 @@ func totalSecondsToString(totalSeconds int) string {
 
 	out := fmt.Sprintf("%d%0.2d", m, s)
 	if m > 9 {
-		return fmt.Sprintf("%do", m)
+		mm := nearestFineDown(m)
+		if mm <= 9 {
+			mm = 12
+		}
+		return fmt.Sprintf("%do", mm)
 	}
 	if len(out) < 3 {
 		return "0" + out
@@ -93,6 +97,14 @@ func nearestDisplayFine(totalSeconds int) int {
 
 		current += 1
 	}
+}
+
+func nearestFineDown(inp int) int {
+	curr := inp
+	for !isFine(curr) {
+		curr -= 1
+	}
+	return curr
 }
 
 func isFine(inp int) bool {
