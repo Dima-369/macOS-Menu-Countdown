@@ -23,33 +23,33 @@ const timerFinishedAudioFile = "you-can-heal.mp3"
 
 const (
 	secondsInMinute = 60
-	secondsInHour   = 60 * 60
-	hoursInDay      = 24
-	timeStep        = time.Millisecond * 200
+	timeStep        = time.Millisecond * 333
 )
 
-// this global variable is apparently required because one can't pass arguments to properQuitMenuItem().
+// caffeinatePID is apparently required because one can't pass arguments to properQuitMenuItem().
 var caffeinatePID = 0
 
 type countdown struct {
-	hours   int
 	minutes int
 	seconds int
 }
 
-func (c countdown) toString() string {
-	return fmt.Sprintf("%0.2d:%0.2d:%0.2d", c.hours, c.minutes, c.seconds)
+func totalSecondsToString(totalSeconds int) string {
+	in := nearestDisplayFine(totalSeconds)
+	m := in / secondsInMinute
+	s := in % secondsInMinute
+	return fmt.Sprintf("%d,%d", m, s)
+}
+
+func toString(minutes, seconds int) string {
+	return totalSecondsToString(minutes*secondsInMinute + seconds)
 }
 
 func (c countdown) isOverTime() bool {
-	return c.hours <= 0 && c.minutes <= 0 && c.seconds <= 0
+	return c.minutes <= 0 && c.seconds <= 0
 }
 
 func (c *countdown) flipForOverTime() {
-	if c.hours < 0 {
-		c.hours = -c.hours
-	}
-
 	if c.minutes < 0 {
 		c.minutes = -c.minutes
 	}
@@ -59,55 +59,50 @@ func (c *countdown) flipForOverTime() {
 	}
 }
 
+func sumDigits(number int) int {
+	sumResult := 0
+	for number != 0 {
+		remainder := number % 10
+		sumResult += remainder
+		number = number / 10
+	}
+	if sumResult > 9 {
+		return sumDigits(sumResult)
+	}
+	return sumResult
+}
+
+func nearestDisplayFine(totalSeconds int) int {
+	current := totalSeconds
+	for {
+		m := current / secondsInMinute
+		s := current % secondsInMinute
+
+		test := sumDigits(m) + sumDigits(s)
+		if isFine(test) {
+			return m*secondsInMinute + s
+		}
+
+		current += 1
+	}
+}
+
+func isFine(inp int) bool {
+	return inp%3 == 0
+}
+
 func getRemainingTime(endTime time.Time) countdown {
 	now := time.Now()
 	difference := endTime.Sub(now)
 
 	total := int64(difference.Seconds())
-	hours := total / (secondsInHour) % hoursInDay
-	minutes := (total / secondsInMinute) % secondsInMinute
+	minutes := total / secondsInMinute
 	seconds := total % secondsInMinute
 
 	return countdown{
-		hours:   int(hours),
 		minutes: int(minutes),
 		seconds: int(seconds),
 	}
-}
-
-func getSecondCountAsHumanString(c int) string {
-	out := ""
-	hours := c / (secondsInHour) % hoursInDay
-	minutes := c / secondsInMinute % secondsInMinute
-	seconds := c % secondsInMinute
-
-	if hours == 1 {
-		out += "1 hour"
-	} else if hours > 1 {
-		out += fmt.Sprintf("%d hours", hours)
-	}
-
-	if out != "" && minutes > 0 {
-		out += ", "
-	}
-
-	if minutes == 1 {
-		out += "1 minute"
-	} else if minutes > 1 {
-		out += fmt.Sprintf("%d minutes", minutes)
-	}
-
-	if out != "" && seconds > 0 {
-		out += ", "
-	}
-
-	if seconds == 1 {
-		out += "1 second"
-	} else if seconds > 1 {
-		out += fmt.Sprintf("%d seconds", seconds)
-	}
-
-	return out
 }
 
 func properQuitMenuItem() []menuet.MenuItem {
@@ -136,15 +131,17 @@ func countDown(startTime time.Time, timerName string, totalCount int) {
 
 		if isOverTime {
 			remaining.flipForOverTime()
+			str := toString(remaining.minutes, remaining.seconds)
 
 			if remaining.seconds >= 1 {
-				menuString = "-" + remaining.toString()
+				menuString = "-" + str
 			} else {
-				// to just display 00:00:00
-				menuString = remaining.toString()
+				// to not display a minus for the zero time
+				menuString = str
 			}
 		} else {
-			menuString = remaining.toString()
+			str := toString(remaining.minutes, remaining.seconds)
+			menuString = str
 		}
 
 		title := menuString
@@ -184,7 +181,7 @@ func playFinishedSound() {
 func timerIsUp(totalCount int) {
 	killCaffeinate()
 
-	forHuman := getSecondCountAsHumanString(totalCount)
+	forHuman := totalSecondsToString(totalCount)
 
 	text := ""
 	if strings.HasSuffix(forHuman, "s") {
@@ -226,27 +223,18 @@ func safeAtoi(s string) int {
 }
 
 func parseStringCountToSeconds(s string) int {
-	s = strings.ToLower(s)
-	s = strings.ReplaceAll(s, "m", "")
-	s = strings.ReplaceAll(s, "h", "")
-	s = strings.ReplaceAll(s, "s", "")
-
 	if strings.Contains(s, ",") {
-		const (
-			inMinutesSecondsFormat      = 2
-			inHoursMinutesSecondsFormat = 3
-		)
+		const inMinutesSecondsFormat = 2
 
 		parts := strings.Split(s, ",")
+
 		switch len(parts) {
 		case inMinutesSecondsFormat:
-			return safeAtoi(parts[0])*secondsInMinute + safeAtoi(parts[1])
-		case inHoursMinutesSecondsFormat:
-			return safeAtoi(parts[0])*secondsInHour + safeAtoi(parts[1])*secondsInMinute + safeAtoi(parts[2])
+			return nearestDisplayFine(safeAtoi(parts[0])*secondsInMinute + safeAtoi(parts[1]))
 		}
 	} else {
 		// just minutes
-		return safeAtoi(s) * secondsInMinute
+		return nearestDisplayFine(safeAtoi(s) * secondsInMinute)
 	}
 
 	println(fmt.Sprintf("Problematic time format: %s\n", s))
@@ -261,11 +249,9 @@ func printUsage() {
 	println("Usage:\n" +
 		"  countdown {time option} {optional timer name}\n\n" +
 		"Valid time options are:\n" +
-		" ,15       (15 seconds)\n" +
-		"  25       (25 minutes)\n" +
-		"  25,      (25 minutes)\n" +
-		"  25,20    (25 minutes and 20 seconds)\n" +
-		"  1,25,120 (1 hour, 25 minutes and 120 seconds)")
+		" ,15      (15 seconds)\n" +
+		"  30      (30 minutes)\n" +
+		"  30,45   (30 minutes and 45 seconds)")
 }
 
 // waitForStdinToQuit queries stdin for an Enter to abort the program.
@@ -287,9 +273,11 @@ func waitForStdinToQuit(startTime time.Time, totalSeconds int) {
 
 	if remaining.isOverTime() {
 		remaining.flipForOverTime()
-		fmt.Printf("\n%s over time...\n", remaining.toString())
+		str := toString(remaining.minutes, remaining.seconds)
+		fmt.Printf("\n%s over time...\n", str)
 	} else {
-		fmt.Printf("\n%s left...\n", remaining.toString())
+		str := toString(remaining.minutes, remaining.seconds)
+		fmt.Printf("\n%s left...\n", str)
 	}
 
 	exitAndKillCaffeinate(0)
