@@ -16,8 +16,6 @@ menu items.**
 * When quit by Enter from the shell, it displays the remaining time (don't use Ctrl+C)
   * Registering any signals does not work with [menuet](https://github.com/caseymrm/menuet) apparently
 
-![Multiple timers](https://raw.githubusercontent.com/Gira-X/macos-menu-countdown/master/readme-images/multiple-timers.png)
-
 ---
 
 Inspired by https://github.com/kristopherjohnson/MenubarCountdown which I previously used and liked,
@@ -74,4 +72,3 @@ Registering a signal to catch the 'Quit' click causes an internal panic with
 
 If you still did, call `pkill caffeinate` to kill the process correctly.
 
-![Problematic Quit Menu Item](https://raw.githubusercontent.com/Gira-X/macos-menu-countdown/master/readme-images/menu.png)
