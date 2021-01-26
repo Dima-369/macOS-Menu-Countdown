@@ -45,7 +45,7 @@ func totalSecondsToString(totalSeconds int) string {
 		if mm <= 9 {
 			mm = 12
 		}
-		return fmt.Sprintf("%do", mm)
+		return fmt.Sprintf("%d°", mm)
 	}
 	if len(out) < 3 {
 		return "0" + out
