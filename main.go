@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -23,11 +24,17 @@ const timerFinishedAudioFile = "you-can-heal.mp3"
 
 const (
 	secondsInMinute = 60
-	timeStep        = time.Millisecond * 333
+	timeStep        = time.Millisecond * 999
+
+	// timerFile is used to display the timers inside Emacs.
+	timerFile = "/Users/Gira/.tim/timers.org"
 )
 
 // caffeinatePID is apparently required because one can't pass arguments to properQuitMenuItem().
 var caffeinatePID = 0
+
+// lastCurrentTime is used to only write to timerFile when the display has changed.
+var lastCurrentTime = ""
 
 type countdown struct {
 	minutes int
@@ -136,6 +143,64 @@ func properQuitMenuItem() []menuet.MenuItem {
 	}
 }
 
+func getNewTimersString(current string, pid int, currentTime string, writeOwnPid bool) string {
+	output := ""
+	pidS := strconv.Itoa(pid)
+	lines := strings.Split(strings.TrimSpace(current), "\n")
+	for _, line := range lines {
+		if !strings.HasPrefix(line, pidS+" ") {
+			linePid := strings.Split(line, " ")[0]
+			if isPidRunning(linePid) {
+				output += line + "\n"
+			}
+		}
+	}
+	if writeOwnPid {
+		output += pidS + " " + currentTime
+	}
+	return strings.TrimSpace(output)
+}
+
+func isPidRunning(pid string) bool {
+	cmd := exec.Command("ps", "-p", pid)
+	err := cmd.Run()
+	return err == nil
+}
+
+// writeToTimersFile fills timerFile with this layout:
+//
+// {pid} {time-to-display}
+// {pid} {time-to-display}
+// ...
+//
+// Every PID can only appear once in the file.
+func writeToTimersFile(currentTime string, writeOwnPid bool) {
+	data, err := ioutil.ReadFile(timerFile)
+	if err != nil {
+		panic(err)
+	}
+
+	initial := string(data)
+	pid := os.Getpid()
+
+	f, err := os.OpenFile(timerFile, os.O_WRONLY|os.O_TRUNC, 0x666)
+	if err != nil {
+		panic(err)
+	}
+	_, err = f.WriteString(getNewTimersString(initial, pid, currentTime, writeOwnPid))
+	if err != nil {
+		err2 := f.Close()
+		if err2 != nil {
+			panic(err2)
+		}
+		panic(err)
+	}
+	err = f.Close()
+	if err != nil {
+		panic(err)
+	}
+}
+
 func countDown(startTime time.Time, timerName string, totalCount int) {
 	menuet.App().Label = fmt.Sprintf("%d", caffeinatePID)
 	menuet.App().Children = properQuitMenuItem
@@ -168,6 +233,11 @@ func countDown(startTime time.Time, timerName string, totalCount int) {
 		if timerName != "" {
 			title = timerName + " " + title
 		}
+
+		if lastCurrentTime != title {
+			writeToTimersFile(title, true)
+		}
+		lastCurrentTime = title
 
 		menuet.App().SetMenuState(&menuet.MenuState{
 			Title: title,
@@ -271,7 +341,7 @@ func printUsage() {
 // waitForStdinToQuit queries stdin for an Enter to abort the program.
 //
 // Using a signal notifier like: signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-// causes an internal crash with the menu bar C code it seems and is not fixable.
+// causes an internal crash with the menu bar C code and is not fixable.
 func waitForStdinToQuit(startTime time.Time, totalSeconds int) {
 	reader := bufio.NewReader(os.Stdin)
 
@@ -310,6 +380,7 @@ func killCaffeinate() {
 }
 
 func exitAndKillCaffeinate(exitCode int) {
+	writeToTimersFile("", false)
 	killCaffeinate()
 	os.Exit(exitCode)
 }
