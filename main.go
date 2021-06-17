@@ -199,6 +199,11 @@ func writeToTimersFile(currentTime string, writeOwnPid bool) {
 	if err != nil {
 		panic(err)
 	}
+
+	// if writeOwnPid is false, the tim process is always about to quit
+	if !writeOwnPid {
+		informEmacsToCheckModeLine()
+	}
 }
 
 func countDown(startTime time.Time, timerName string, totalCount int) {
@@ -290,6 +295,7 @@ func timerIsUp(totalCount int) {
 		panic(err)
 	}
 
+	writeToTimersFile("", false)
 	os.Exit(0)
 }
 
@@ -377,6 +383,10 @@ func killCaffeinate() {
 
 	// we do not check for errors here because the timer might have already been killed
 	_ = cmd.Wait()
+}
+
+func informEmacsToCheckModeLine() {
+	_ = exec.Command("timeout", "0.06", "emacsclient", "--eval", "(tim-mode-line-check)").Run()
 }
 
 func exitAndKillCaffeinate(exitCode int) {
