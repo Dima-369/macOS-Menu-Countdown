@@ -35,6 +35,7 @@ var caffeinatePID = 0
 
 // lastCurrentTime is used to only write to timerFile when the display has changed.
 var lastCurrentTime = ""
+var informedEmacsOnLaunch = false
 
 type countdown struct {
 	minutes int
@@ -203,6 +204,11 @@ func writeToTimersFile(currentTime string, writeOwnPid bool) {
 	// if writeOwnPid is false, the tim process is always about to quit
 	if !writeOwnPid {
 		informEmacsToCheckModeLine()
+	} else {
+		if !informedEmacsOnLaunch {
+			informEmacsToCheckModeLine()
+			informedEmacsOnLaunch = true
+		}
 	}
 }
 
